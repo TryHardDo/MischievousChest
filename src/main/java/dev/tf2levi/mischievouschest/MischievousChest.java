@@ -3,7 +3,10 @@ package dev.tf2levi.mischievouschest;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Logger;
+
 public final class MischievousChest extends JavaPlugin {
+    private final Logger pluginLogger = this.getLogger();
 
     @Override
     public void onEnable() {
@@ -12,10 +15,15 @@ public final class MischievousChest extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        Bukkit.getScheduler().cancelTasks(this);
     }
 
-    public void initPlugin() {
+    private void initPlugin() {
         Bukkit.getPluginManager().registerEvents(new ListenerClass(this), this);
+        Utils.LogStartup(Bukkit.getConsoleSender(), this.getDescription());
+    }
+
+    public Logger getPluginLogger() {
+        return pluginLogger;
     }
 }
