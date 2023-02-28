@@ -5,3 +5,13 @@ api-version: 1.19
 authors: [ tf2levi, repa12 ]
 description: This plugin brings you ability to make funny chests with random troll effects.
 website: https://github.com/TryHardDo
+commands:
+  mischievouschest:
+    permission-message: "§cYou do not have permission to execute this command!"
+    usage: "§cCommand usage tip: §e/<command> [args] §7| §cUse §e/<command> help §cto list the available commands!"
+    permission: mchest.default
+    description: Used to interact with the plugin.
+permissions:
+  mchest.default:
+    default: true
+    description: Permission to use the basic command(s) of the plugin.
