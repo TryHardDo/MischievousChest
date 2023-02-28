@@ -1,0 +1,7 @@
+name: MischievousChest
+version: '${project.version}'
+main: dev.tf2levi.mischievouschest.MischievousChest
+api-version: 1.19
+authors: [ tf2levi, repa12 ]
+description: This plugin brings you ability to make funny chests with random troll effects.
+website: https://github.com/TryHardDo
