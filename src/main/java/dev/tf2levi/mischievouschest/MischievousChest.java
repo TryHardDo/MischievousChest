@@ -34,7 +34,7 @@ public final class MischievousChest extends JavaPlugin {
 
         try {
             this.pluginConfig.load(false);
-        } catch (IOException | InvalidConfigurationException e) {
+        } catch (IOException | InvalidConfigurationException | IllegalAccessException e) {
             pluginLogger.severe("There was an error in the configuration loading algorithm...");
             e.printStackTrace();
         }
@@ -45,5 +45,9 @@ public final class MischievousChest extends JavaPlugin {
 
     public Logger getPluginLogger() {
         return pluginLogger;
+    }
+
+    public ConfigModel getPluginConfig() {
+        return pluginConfig;
     }
 }

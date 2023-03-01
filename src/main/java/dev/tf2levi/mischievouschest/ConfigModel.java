@@ -19,15 +19,35 @@ import java.lang.reflect.Field;
 public class ConfigModel {
 
     private final File configFile;
-    @ConfigOption(path = "prefix", defaultValue = "§8$ > §e§lMischievousChest: §f")
-    private String prefix;
-    @ConfigOption(path = "behavior.chance", defaultValue = "50")
-    private int trollChance;
-    @ConfigOption(path = "behavior.logevent", defaultValue = "true")
-    private boolean logMessages;
+    @ConfigOption(path = "prefix")
+    private String prefix = "§8$ > §e§lMischievousChest: §f";
+    @ConfigOption(path = "behavior.chance")
+    private int trollChance = 50;
+    @ConfigOption(path = "behavior.projectile_count")
+    private int projectileCount = 20;
+    @ConfigOption(path = "behavior.launch_radius")
+    private double launchRadius = 10;
+    @ConfigOption(path = "behavior.log_event")
+    private boolean logMessages = true;
 
     public ConfigModel(File configFile) {
         this.configFile = configFile;
+    }
+
+    public int getProjectileCount() {
+        return projectileCount;
+    }
+
+    public void setProjectileCount(int projectileCount) {
+        this.projectileCount = projectileCount;
+    }
+
+    public double getLaunchRadius() {
+        return launchRadius;
+    }
+
+    public void setLaunchRadius(double launchRadius) {
+        this.launchRadius = launchRadius;
     }
 
     public String getPrefix() {
@@ -58,7 +78,7 @@ public class ConfigModel {
         return configFile;
     }
 
-    public void load(boolean force) throws IOException, InvalidConfigurationException {
+    public void load(boolean force) throws IOException, InvalidConfigurationException, IllegalAccessException {
         if (!configFile.exists()) {
             save();
             return;
@@ -70,10 +90,9 @@ public class ConfigModel {
         Field[] fields = getClass().getDeclaredFields();
 
         for (Field field : fields) {
-            ConfigOption annotation = field.getAnnotation(ConfigOption.class);
-            if (annotation != null) {
-                String path = annotation.path();
-                String defaultValue = annotation.defaultValue();
+            if (field.isAnnotationPresent(ConfigOption.class)) {
+                String path = field.getAnnotation(ConfigOption.class).path();
+                Object defaultValue = field.get(this);
                 Object value = config.get(path, defaultValue);
                 try {
                     field.set(this, value);
@@ -86,10 +105,12 @@ public class ConfigModel {
         for (String key : config.getKeys(false)) {
             boolean found = false;
             for (Field field : fields) {
-                ConfigOption annotation = field.getAnnotation(ConfigOption.class);
-                if (annotation != null && annotation.path().equals(key)) {
-                    found = true;
-                    break;
+                if (field.isAnnotationPresent(ConfigOption.class)) {
+                    String path = field.getAnnotation(ConfigOption.class).path();
+                    if (path.equals(key)) {
+                        found = true;
+                        break;
+                    }
                 }
             }
             if (!found) {
@@ -98,10 +119,9 @@ public class ConfigModel {
         }
 
         for (Field field : fields) {
-            ConfigOption annotation = field.getAnnotation(ConfigOption.class);
-            if (annotation != null) {
-                String path = annotation.path();
-                String defaultValue = annotation.defaultValue();
+            if (field.isAnnotationPresent(ConfigOption.class)) {
+                String path = field.getAnnotation(ConfigOption.class).path();
+                Object defaultValue = field.get(this);
                 Object value;
                 try {
                     value = field.get(this);
@@ -128,9 +148,8 @@ public class ConfigModel {
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
         for (Field field : getClass().getDeclaredFields()) {
-            ConfigOption annotation = field.getAnnotation(ConfigOption.class);
-            if (annotation != null) {
-                String path = annotation.path();
+            if (field.isAnnotationPresent(ConfigOption.class)) {
+                String path = field.getAnnotation(ConfigOption.class).path();
                 Object value;
                 try {
                     value = field.get(this);
@@ -149,7 +168,5 @@ public class ConfigModel {
     @Target(ElementType.FIELD)
     public @interface ConfigOption {
         String path();
-
-        String defaultValue();
     }
 }
