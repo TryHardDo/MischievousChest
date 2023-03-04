@@ -17,7 +17,6 @@ import java.lang.reflect.Field;
  * Efficient, fast, dynamic config management.
  */
 public class ConfigModel {
-
     private final File configFile;
     @ConfigOption(path = "prefix")
     private String prefix = "§8$ > §e§lMischievousChest: §f";
