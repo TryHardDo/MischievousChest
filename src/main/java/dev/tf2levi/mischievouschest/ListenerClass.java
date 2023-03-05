@@ -90,20 +90,22 @@ public class ListenerClass implements Listener {
         World playerWorld = placer.getWorld();
         Location clickedLocation = clickedBlock.getRelative(BlockFace.UP).getLocation();
 
-        ArmorStand as = (ArmorStand) playerWorld.spawnEntity(clickedLocation.clone().add(0.5, -0.5, 0.5), EntityType.ARMOR_STAND);
-        playerWorld.getBlockAt(clickedLocation).setType(Material.COBBLESTONE_WALL);
-        as.setVisible(false);
+        ArmorStand as = (ArmorStand) playerWorld.spawnEntity(clickedLocation.clone().add(0.5, 0, 0.5), EntityType.ARMOR_STAND);
+
         as.setSmall(false);
         as.setGravity(false);
         as.setBasePlate(false);
-        as.setArms(false);
         as.setCustomName("§c§lVédelem");
         as.setCustomNameVisible(true);
+        as.setInvulnerable(true);
 
         EntityEquipment equipment = as.getEquipment();
         assert equipment != null;
 
         equipment.setHelmet(new ItemStack(Material.OBSERVER), true);
+        equipment.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE), true);
+        equipment.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS), true);
+        equipment.setBoots(new ItemStack(Material.LEATHER_BOOTS), true);
 
         int radius = 10;
         new SentryRunnable(as, playerWorld, radius).runTaskTimer(mischievousChest, 0, 1);
