@@ -1,10 +1,13 @@
-package dev.tf2levi.mischievouschest;
+package dev.tf2levi.sentryguard;
 
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 public class Utils {
@@ -43,5 +46,10 @@ public class Utils {
             yaw += 2 * Math.PI;
         }
         return -yaw;
+    }
+
+    public static boolean hasLineOfSight(World pointsWorld, Vector traceVector) {
+        RayTraceResult traceResult = pointsWorld.rayTraceBlocks(traceVector.toLocation(pointsWorld), traceVector.normalize(), traceVector.length(), FluidCollisionMode.NEVER, true);
+        return traceResult != null;
     }
 }

@@ -1,4 +1,4 @@
-package dev.tf2levi.mischievouschest;
+package dev.tf2levi.sentryguard;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,41 +12,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
-/**
- * TryConfigLoader(TM) Copyright 2023 TryHardDo
- * Efficient, fast, dynamic config management.
- */
 public class ConfigModel {
     private final File configFile;
     @ConfigOption(path = "prefix")
-    private String prefix = "§8$ > §e§lMischievousChest: §f";
-    @ConfigOption(path = "behavior.chance")
-    private int trollChance = 50;
-    @ConfigOption(path = "behavior.projectile_count")
-    private int projectileCount = 20;
-    @ConfigOption(path = "behavior.launch_radius")
-    private double launchRadius = 10;
-    @ConfigOption(path = "behavior.log_event")
-    private boolean logMessages = true;
+    private String prefix = "§8$ > §e§lSentryGuard: §f";
 
     public ConfigModel(File configFile) {
         this.configFile = configFile;
-    }
-
-    public int getProjectileCount() {
-        return projectileCount;
-    }
-
-    public void setProjectileCount(int projectileCount) {
-        this.projectileCount = projectileCount;
-    }
-
-    public double getLaunchRadius() {
-        return launchRadius;
-    }
-
-    public void setLaunchRadius(double launchRadius) {
-        this.launchRadius = launchRadius;
     }
 
     public String getPrefix() {
@@ -55,22 +27,6 @@ public class ConfigModel {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
-    }
-
-    public int getTrollChance() {
-        return trollChance;
-    }
-
-    public void setTrollChance(int trollChance) {
-        this.trollChance = trollChance;
-    }
-
-    public boolean getLogMessages() {
-        return logMessages;
-    }
-
-    public void setLogMessages(boolean logMessages) {
-        this.logMessages = logMessages;
     }
 
     public File getConfigFile() {

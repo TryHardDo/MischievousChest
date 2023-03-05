@@ -1,15 +1,15 @@
-package dev.tf2levi.mischievouschest.commands;
+package dev.tf2levi.sentryguard.commands;
 
-import dev.tf2levi.mischievouschest.MischievousChest;
+import dev.tf2levi.sentryguard.SentryGuard;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 public class BaseCommand implements CommandExecutor {
-    private final MischievousChest mischievousChest;
+    private final SentryGuard sentryGuard;
 
-    public BaseCommand(MischievousChest mischievousChest) {
-        this.mischievousChest = mischievousChest;
+    public BaseCommand(SentryGuard sentryGuard) {
+        this.sentryGuard = sentryGuard;
     }
 
     @Override
