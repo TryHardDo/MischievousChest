@@ -5,8 +5,8 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.util.EulerAngle;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -14,19 +14,12 @@ public class Utils {
     public static void LogStartup(ConsoleCommandSender sender, PluginDescriptionFile descriptionFile) {
         sender.sendMessage(
                 "§8+",
-                "§8| §7$ > §eMischievousChest | §6" + descriptionFile.getVersion(),
+                "§8| §7$ > §eSentryGuard | §6" + descriptionFile.getVersion(),
                 "§8| §7Developed by: " + String.join("§c, §7", descriptionFile.getAuthors()),
                 "§8| §7Supported API version: §e" + descriptionFile.getAPIVersion(),
                 "§8| §7Env: §9" + Bukkit.getServer().getVersion(),
                 "§8+"
         );
-    }
-
-    public static EulerAngle calculateArmorStandHeadRotation(Location eyeLocation, Location targetLocation) {
-        Vector direction = targetLocation.toVector().subtract(eyeLocation.toVector()).normalize();
-        double pitch = Math.asin(-direction.getY());
-        double yaw = Math.atan2(-direction.getX(), direction.getZ());
-        return new EulerAngle(pitch, yaw, 0);
     }
 
     public static double calculatePitch(Location sourceLocation, Location targetLocation) {
@@ -48,8 +41,14 @@ public class Utils {
         return -yaw;
     }
 
-    public static boolean hasLineOfSight(World pointsWorld, Vector traceVector) {
-        RayTraceResult traceResult = pointsWorld.rayTraceBlocks(traceVector.toLocation(pointsWorld), traceVector.normalize(), traceVector.length(), FluidCollisionMode.NEVER, true);
-        return traceResult != null;
+    public static boolean hasLineOfSight(Entity entity, Location bodyLoc) {
+        World world = entity.getWorld();
+        Location entityLocation = entity.getLocation();
+        Vector direction = entityLocation.toVector().subtract(bodyLoc.toVector()).normalize();
+        double distance = bodyLoc.distance(entityLocation);
+        RayTraceResult result = world.rayTrace(bodyLoc, direction, distance, FluidCollisionMode.NEVER, true, 0.0, null);
+
+        return result == null || result.getHitEntity() == entity;
     }
+
 }

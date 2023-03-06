@@ -1,6 +1,9 @@
 package dev.tf2levi.sentryguard.sentry;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -9,48 +12,24 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class Sentry {
     private final UUID owner;
-    private final String displayName;
-    private final boolean enableDisplayName;
-    private List<UUID> friendly;
-    private List<UUID> enemy;
-    private List<EntityType> whitelist;
-    private int radius;
-    private int fireRate;
     private ArmorStand sentryBody;
     private Inventory sentryInventory;
     private SentryRunnable sentryRunnable;
-    private Sound attackSound;
-    private double damageMultiplier;
-    private double health; // Todo: Make it work
-    private boolean fireAmmo;
-    private boolean explosiveAmmo;
-    private PotionEffect ammoEffect;
-    private Color arrowColor;
+    private SentrySettings sentrySettings;
 
-    public Sentry(UUID ownerUUID) {
+    public Sentry(UUID ownerUUID, SentrySettings sentrySettings) {
         this.owner = ownerUUID;
-        displayName = "Őrtorony";
-        enableDisplayName = true;
-        friendly = new ArrayList<>();
-        enemy = new ArrayList<>();
-        whitelist = new ArrayList<>();
-        radius = 5;
-        fireRate = 100;
-        sentryBody = null;
-        sentryInventory = null;
-        sentryRunnable = null;
-        attackSound = Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR;
+        this.sentryBody = null;
+        this.sentryInventory = null;
+        this.sentryRunnable = null;
+        this.sentrySettings = sentrySettings;
 
-        whitelist.addAll(Arrays.asList(
+        /*whitelist.addAll(Arrays.asList(
                 EntityType.VILLAGER,
                 EntityType.ALLAY,
                 EntityType.IRON_GOLEM,
@@ -65,111 +44,15 @@ public class Sentry {
                 EntityType.TURTLE,
                 EntityType.PARROT,
                 EntityType.PANDA
-        ));
+        ));*/
     }
 
-    public boolean isExplosiveAmmo() {
-        return explosiveAmmo;
+    public SentrySettings getSentrySettings() {
+        return sentrySettings;
     }
 
-    public void setExplosiveAmmo(boolean explosiveAmmo) {
-        this.explosiveAmmo = explosiveAmmo;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public boolean isEnableDisplayName() {
-        return enableDisplayName;
-    }
-
-    public double getDamageMultiplier() {
-        return damageMultiplier;
-    }
-
-    public void setDamageMultiplier(double damageMultiplier) {
-        this.damageMultiplier = damageMultiplier;
-    }
-
-    public boolean isFireAmmo() {
-        return fireAmmo;
-    }
-
-    public void setFireAmmo(boolean fireAmmo) {
-        this.fireAmmo = fireAmmo;
-    }
-
-    public double getHealth() {
-        return health;
-    }
-
-    public void setHealth(double health) {
-        this.health = health;
-    }
-
-    public PotionEffect getAmmoEffect() {
-        return ammoEffect;
-    }
-
-    public void setAmmoEffect(PotionEffect ammoEffect) {
-        this.ammoEffect = ammoEffect;
-    }
-
-    public Color getArrowColor() {
-        return arrowColor;
-    }
-
-    public void setArrowColor(Color arrowColor) {
-        this.arrowColor = arrowColor;
-    }
-
-    public Sound getAttackSound() {
-        return attackSound;
-    }
-
-    public void setAttackSound(Sound attackSound) {
-        this.attackSound = attackSound;
-    }
-
-    public List<UUID> getFriendly() {
-        return friendly;
-    }
-
-    public void setFriendly(List<UUID> friendly) {
-        this.friendly = friendly;
-    }
-
-    public List<UUID> getEnemy() {
-        return enemy;
-    }
-
-    public void setEnemy(List<UUID> enemy) {
-        this.enemy = enemy;
-    }
-
-    public List<EntityType> getWhitelist() {
-        return whitelist;
-    }
-
-    public void setWhitelist(List<EntityType> whitelist) {
-        this.whitelist = whitelist;
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    public int getFireRate() {
-        return fireRate;
-    }
-
-    public void setFireRate(int fireRate) {
-        this.fireRate = fireRate;
+    public void setSentrySettings(SentrySettings sentrySettings) {
+        this.sentrySettings = sentrySettings;
     }
 
     public ArmorStand getSentryBody() {
@@ -217,11 +100,12 @@ public class Sentry {
         sentryBody = (ArmorStand) spawnWorld.spawnEntity(location.clone().add(0.5, 0, 0.5), EntityType.ARMOR_STAND);
         sentryInventory = Bukkit.createInventory(null, InventoryType.CHEST, "§cLőszer tartó");
 
-        sentryBody.setCustomName(displayName);
-        sentryBody.setCustomNameVisible(enableDisplayName);
-        sentryBody.setInvulnerable(true);
-        sentryBody.setArms(true);
-        sentryBody.setGravity(false);
+        sentryBody.setCustomNameVisible(sentrySettings.isVisibleDisplayNameFeature());
+        if (sentrySettings.getDisplayName() != null) sentryBody.setCustomName(sentrySettings.getDisplayName());
+        sentryBody.setInvulnerable(sentrySettings.isGodModeFeature());
+        sentryBody.setArms(sentrySettings.isShowArms());
+        sentryBody.setGravity(sentrySettings.isAntiGravityFeature());
+        sentryBody.setGlowing(sentrySettings.isGlowingFeature());
         sentryBody.setBasePlate(false);
 
         EntityEquipment equipment = sentryBody.getEquipment();
@@ -233,7 +117,7 @@ public class Sentry {
         equipment.setBoots(new ItemStack(Material.LEATHER_BOOTS), true);
 
         // Make sure to never attack the owner.
-        friendly.add(owner);
+        sentrySettings.getFriendlyPlayers().add(owner);
         SentryManager.registerSentry(this);
 
         return this;
@@ -287,6 +171,6 @@ public class Sentry {
     }
 
     public int getFireRateInTick() {
-        return (20 * 60) / fireRate;
+        return (20 * 60) / sentrySettings.getFireRate();
     }
 }

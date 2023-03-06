@@ -3,6 +3,7 @@ package dev.tf2levi.sentryguard;
 import dev.tf2levi.sentryguard.enums.ShutdownCause;
 import dev.tf2levi.sentryguard.sentry.Sentry;
 import dev.tf2levi.sentryguard.sentry.SentryManager;
+import dev.tf2levi.sentryguard.sentry.SentrySettings;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -16,7 +17,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
@@ -38,11 +41,15 @@ public class ListenerClass implements Listener {
         }
 
         Arrow arrow = ((Arrow) e.getEntity());
-        if (!arrow.getPersistentDataContainer().has(new NamespacedKey(sentryGuard, "explosiveAmmo"), PersistentDataType.BYTE))
+        NamespacedKey featureKey = new NamespacedKey(sentryGuard, "explosiveAmmo");
+        PersistentDataContainer persistentDataContainer = arrow.getPersistentDataContainer();
+        if (!persistentDataContainer.has(featureKey, PersistentDataType.BYTE)) {
             return;
+        }
+
+        persistentDataContainer.remove(featureKey);
 
         Location impactLoc = e.getHitBlock() != null ? e.getHitBlock().getLocation() : e.getHitEntity() != null ? e.getHitEntity().getLocation() : null;
-
         if (impactLoc == null) {
             return;
         }
@@ -53,6 +60,7 @@ public class ListenerClass implements Listener {
         }
 
         world.createExplosion(impactLoc, 3f, false, false);
+        arrow.remove();
     }
 
     @EventHandler
@@ -75,22 +83,15 @@ public class ListenerClass implements Listener {
     }
 
     @EventHandler
-    public void onSentryInvManipulation(InventoryClickEvent e) {
-        Sentry manipulated = SentryManager.getByInventory(e.getClickedInventory());
-
-        if (manipulated == null) {
+    public void onInventoryClick(InventoryClickEvent e) {
+        Inventory clicked = e.getInventory();
+        if (SentryManager.getByInventory(clicked) == null) {
             return;
         }
 
-        int slot = e.getSlot();
-        if (slot != e.getWhoClicked().getInventory().getHeldItemSlot()) {
-            return;
-        }
-
-        ItemStack item = e.getCurrentItem();
-        if (item == null || item.getType() != Material.ARROW) {
-            e.setCancelled(true);
+        if (e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.ARROW) {
             e.getWhoClicked().sendMessage("§cCsak Nyíl a megengedett lőszer jelenleg.");
+            e.setCancelled(true);
         }
     }
 
@@ -141,13 +142,16 @@ public class ListenerClass implements Listener {
 
         Location clickedLocation = clickedBlock.getRelative(BlockFace.UP).getLocation();
 
-        Sentry sentry = new Sentry(placer.getUniqueId()).spawnSentry(clickedLocation);
-        sentry.setRadius(10);
-        sentry.setArrowColor(Color.GREEN);
-        sentry.setFireRate(200);
-        sentry.setFireAmmo(true);
-        sentry.setExplosiveAmmo(true);
+        SentrySettings sentrySettings = new SentrySettings();
+        sentrySettings.setRadius(10);
+        sentrySettings.setArrowColorFeature(Color.GREEN);
+        sentrySettings.setFireRate(150);
+        sentrySettings.setFireAmmoFeature(true);
+        sentrySettings.setExplosiveAmmoFeature(true);
+        sentrySettings.setGodModeFeature(true);
+        sentrySettings.setGlowingFeature(true);
 
+        Sentry sentry = new Sentry(placer.getUniqueId(), sentrySettings).spawnSentry(clickedLocation);
         sentry.startSentry(sentryGuard);
     }
 }
